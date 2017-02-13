@@ -8,8 +8,9 @@ On the estimation of Partially linear spatial autoregressive models
    on the example of the well known Boston Housing dataset.
 
 Reference for Partially linear spatial autoregressive models: 
-    Preprint: Difference-based estimation of partially linear
-    spatial autoregressive models
+    Draft: Difference-based estimation of partially linear
+    spatial autoregressive models 
+    (https://www.researchgate.net/project/diffPLSAR)
     
 References for the dataset and some estimation approaches:
     Harrison, David, and Daniel L. Rubinfeld, 
