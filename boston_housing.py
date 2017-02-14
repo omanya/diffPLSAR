@@ -7,32 +7,36 @@ Created on Fri Feb 10 17:54:52 2017
 On the estimation of Partially linear spatial autoregressive models 
    on the example of the well known Boston Housing dataset.
 
-Reference for Partially linear spatial autoregressive models: 
-    Draft: Difference-based estimation of partially linear
+Reference for the Partially linear spatial autoregressive models: 
+    [1] Draft: Difference-based estimation of partially linear
     spatial autoregressive models 
     (https://www.researchgate.net/project/diffPLSAR)
     
 References for the dataset and some estimation approaches:
-    Harrison, David, and Daniel L. Rubinfeld, 
+    [2] Harrison, David, and Daniel L. Rubinfeld, 
     Hedonic Housing Prices and the Demand for Clean Air, 
     Journal of Environmental Economics and Management, 
     Volume 5, (1978), 81-102. (Original data)
 
-    Gilley, O.W., and R. Kelley Pace, On the Harrison and Rubinfeld Data, 
+    [3] Gilley, O.W., and R. Kelley Pace, On the Harrison and Rubinfeld Data, 
     Journal of Environmental Economics and Management, 31 (1996), 403-405. 
     (Provided corrections and examined censoring)
 
-    Pace, R. Kelley, and O.W. Gilley, 
+    [4] Pace, R. Kelley, and O.W. Gilley, 
     Using the Spatial Configuration of the Data to Improve Estimation, 
     Journal of the Real Estate Finance and Economics, 14 (1997), 333-340.
     
+    [5] Hall, P., Kay, J., and Titterington, D. M.,
+    Asymptotically optimal difference-based estimation of variance in nonparametric regression.
+    Biometrika, 77(3) (1990), 521–528.
+    
 Summary:
-    We propose a simple difference-based approach to estimation of
+    We propose a simple difference-based approach to the estimation of
     partially linear spatial autoregressive models with general error struc-
     ture: y = m(t)+ Xb + l W y + e
-    y univariate response, m() smooth fucntion, t explanatory vars entering m,
+    y univariate response, m() smooth function, t explanatory vars entering m,
     X explanatory vars with linear effects, W spatial weight matrix 
-    with zero diagonal.
+    with zero diagonal, e possibly spatially correlated error terms orthogonal to other vars.
         
     The estimation contains several steps: 
         
@@ -54,16 +58,16 @@ import statsmodels.api as sm
 import matplotlib
 import matplotlib.pyplot as plt
 #%%
-#load the corrected boston housing dataset
+#load the corrected boston housing dataset, References [2],[3]
 #from: 
-boston = pd.read_csv("C:\\Users\\Mascha\\Documents\\boston.csv",header=0)
+boston = pd.read_csv("..\\boston.csv",header=0)
 
 #take a look at the data
 list(boston)
 boston.head()
 boston.shape
 
-# Transformations fo features (taken from Pace, Kelley and Gilley (1997))
+# Transformations fo features (taken from [4])
 feats_to_log = ["CMEDV","RAD","DIS","LSTAT"]
 feats_to_sqr = ["NOX","RM"]
 #feats_to_drop = ["ZN","CHAS","INDUS"]
@@ -72,14 +76,15 @@ boston[feats_to_sqr] = boston[feats_to_sqr]**2
 #boston.drop(feats_to_drop,axis = 1, inplace = True)
 
 #%%
-""" We are going to estimate a partial linear model: 
-    CMEDV = m(LAT,LON)+ Xb + lambda W CMEDV + error
-    m() is a smooth function nonparametrized
-    Xb + lambda W CMEDV is the parametric part, X contains exploratory variables
-    lambda W CMEDV is the spatial autoregressive part with lambda spatial autoregressive parameter
-    W is the spatial weight matrix with zero diagonal reflecting the spatial relationship in CMEDV
+""" We are going to estimate a partially linear model: 
+    CMEDV = m(LAT,LON)+ Xb + lambda W CMEDV + e
+    m() is a smooth function nonparametrized,
+    Xb + lambda W CMEDV is the parametric part, X contains exploratory variables,
+    lambda W CMEDV is the spatial autoregressive part with lambda spatial autoregressive parameter,
+    W is the spatial weight matrix with zero diagonal reflecting the spatial relationship in CMEDV, and
+    e errors with general covariance structure.
 
-    There are several technical assumptions on the model parts, see Preprint.
+    There are several technical assumptions on the model parts, see [1].
 """
 # Variable definitions
 x,y,coord = boston.loc[:,"CRIM":"LSTAT"],boston["CMEDV"],boston.loc[:,"LON":"LAT"]
@@ -108,7 +113,7 @@ coord_a = coord_a[path]
 x_a = np.asarray(x)[path]
 y_a = np.asarray(y)[path]
 
-#Define the difference matrix D for the differencing order r=4 (the optimized weights are taken from Hall et al. (1990))
+#Define the difference matrix D for the differencing order r=4 (the optimized weights are taken from [5])
 dv = [0.2708,-0.0142,0.6909,-0.4858,-0.4617]   
 d = np.zeros((n,n))
 r = len(dv)
@@ -119,7 +124,7 @@ for i in range(n-r):
 #Define the spatial weight matrix W
 from scipy.spatial.distance import pdist, squareform
 
-#define distance and the bandwidth behind which there is no spatial dependence
+#define the distance and the bandwidth behind which there is no spatial dependence
 dn = 1#np.floor(n**(1/4)) # the distance bandwidth (rule of thumb)
 w = squareform(pdist(coord_a,'seuclidean'))
 
